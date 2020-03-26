@@ -1,3 +1,7 @@
 from django.shortcuts import render
+from scanhosts.models import *
+from django.http import HttpResponse
+import json
+import logging
 
-# Create your views here.
+logger = logging.getLogger('django')

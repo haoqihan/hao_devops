@@ -117,3 +117,36 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
 STATIC_URL = '/static/'
+
+# 定义log配置
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": "[%(levelname)s %(asctime)s %(module)s:%(lineno)d] %(message)s",
+            "datefmt": "%Y%m%d %H:%M:%S",
+        },
+    },
+    "handlers": {
+        'file': {
+            "level": "INFO",
+            "class": "logging.FileHandler",
+            "formatter": "verbose",
+            "filename": "/tmp/error.logs"
+        },
+    },
+    "loggers": {
+        'django': {
+            'handlers': ['file'],
+            'level': "INFO",
+            'propagate': True
+        },
+    },
+}
+
+# 配置邮件 SMTP/POP3
+EMAIL_HOST = "smtp.163.com"
+EMAIL_HOST_USER = '18233027057@163.com'
+EMAIL_HOST_PASSWORD = "XBQPQUIKRXFMLJDD"
+EMAIL_HOST_TLS = False

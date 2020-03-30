@@ -1,0 +1,2 @@
+[nginx_hosts]
+106.13.54.147:22 ansible_ssh_user=root ansible_ssh_pass='1233333'

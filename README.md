@@ -303,15 +303,129 @@ ansible的ad-hoc模式
 #### include的用法
 include_tasks/include:动态的包含tasks任务列表执行
 #### 为什么需要用到roles
+是一种利用在playbook中的剧本配置模式，有着自己特定结构
+
+```markdown
+production        # 正式环境的inventory文件
+staging           #测试环境用得inventory文件
+group_vars/  # 机器组的变量文件
+      group1        
+      group2
+host_vars/   #执行机器成员的变量
+      hostname1     
+      hostname2
+================================================
+site.yml                 # 主要的playbook剧本
+webservers.yml    # webserver类型服务所用的剧本
+dbservers.yml       # 数据库类型的服务所用的剧本
+
+roles/
+      webservers/        #webservers这个角色相关任务和自定义变量
+           tasks/
+               main.yml
+           handlers/
+               main.yml
+           vars/            #
+                main.yml
+        dbservers/         #dbservers这个角色相关任务和定义变量
+            ...
+      common/         # 公共的
+           tasks/        #   
+                main.yml    # 
+           handlers/     #
+                main.yml    # handlers file.
+           vars/         # 角色所用到的变量
+                main.yml    # 
+===============================================
+      templates/    #
+            ntp.conf.j2 # 模版文件
+      files/        #   用于上传存放文件的目录
+            bar.txt     #  
+            foo.sh      # 
+      meta/         # 角色的依赖
+            main.yml    # 
+```
+#### nginx编译安装
+```
+## 主目录
+|--- ansible.cfg
+|--- files          存放上传文件
+|--- production     线上的主机配置文件
+|--- roles          roles角色执行
+|--- staging        线下测试环境使用的主机配置文件
+|--- templates      模板(配置，html)
+ ——- webserver.yml  web服务相关主执行文件
+
+# files目录
+|--- index.html  测试使用的html文件
+|--- nginx       系统init中，控制nginx启动脚本
+ —— nginx.tar.gz  nginx安装包文件
+
+# templates目录结构
+|
+ - nginxs.conf   nginx的自定义conf文件
+
+# roles目录
+|
+|-- apache 
+|-- command
+|   |--- tasks
+|           |-- main.yml
+|    |--- vars
+|           |---- main.yml
+|--- meta
+|--- nginx
+|    |-- handlers   
+|         |--- main.yml
+|    | tasks
+        |-- basic.yml
+        |-- main.yml
+        | nginx.yml
+      |-- vars
+            -- main.yml
+-- tasks   
+
+
+```
 
 
 
 
+```shell script
+. /etc/rc.d/init.d/functions
+if [ -L $0 ];then
+    initscript=`/bin/readlink -f $0`
+else
+    initscript=$0
+fi
+sysconfig=`/bin/basename $initscript`
+if [ -f /etc/sysconfig/$initscript ];then
+    . /etc/sysconfig/$$initscript
+fi
+
+nginx=${NGINX:-/opt/app/nginx/sbin/nginx}
+prog=`/bin/basename $nginx`
+conffile=${CONFFILE:-/ope/app/nginx/conf/nginx.conf}
+lockfile=${LOCKFILE:-/var/lock/subsys/nginx}
+
+```
 
 
+```shell script
+InventoryManager
+    1.添加主机到指定主机组 add_host()
+    2.查看主机组资源 get_groups_dict()
+    3.获取指定的主机对象 get_host()
+VariableManager
+    1.查看主机变量方法 get_vars()
+    2.设置主机变量方法: set_host_variable()
+    3.添加扩展变量 extra_vars
+      variable_manager.extra_vars = {}
+
+ad-hoc
 
 
-
+```
 
 
 

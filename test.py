@@ -14,7 +14,7 @@ jssh = paramiko.SSHClient()
 # 处理第一次连接的策略
 jssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 # 连接服务器
-jssh.connect("106.13.54.147", 22, "root", "HHH111@@@")
+jssh.connect("106.13.54.147", 22, "root", )
 _, stdout, _ = jssh.exec_command("ls /")
 # print(stdin.read())
 print(str(stdout.read()),"out")

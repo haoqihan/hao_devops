@@ -2,7 +2,7 @@
 - hosts: 106.13.54.147
   remote_user: root
   vars:
-    file_name: testfile
+    file_name: testfile1
   tasks:
     - name: test touch file
       command: touch {{ file_name }}

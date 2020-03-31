@@ -15,10 +15,9 @@ from optparse import Values
 from ansible.utils.sentinel import Sentinel
 
 
-
 class ResultCallback(CallbackBase):
     def __init__(self, *args, **kwargs):
-        # super(ResultsCollector, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.host_ok = {}
         self.host_unreachable = {}
         self.host_failed = {}
@@ -80,22 +79,6 @@ class AnsibleApi(object):
                 tqm.cleanup()
                 # shutil.rmtree(C.DEFAULT_LOCAL_TMP, True)
 
-        results_raw = {}
-        results_raw['success'] = {}
-        results_raw['failed'] = {}
-        results_raw['unreachable'] = {}
-
-        for host, result in self.results_callback.host_ok.items():
-            results_raw['success'][host] = json.dumps(result._result)
-
-        for host, result in self.results_callback.host_failed.items():
-            results_raw['failed'][host] = result._result['msg']
-
-        for host, result in self.results_callback.host_unreachable.items():
-            results_raw['unreachable'][host] = result._result['msg']
-
-        print(results_raw)
-
     def playbookrun(self, playbook_path):
 
         # self.variable_manager.extra_vars = {'customer': 'test', 'disabled': 'yes'}
@@ -103,15 +86,36 @@ class AnsibleApi(object):
                                     inventory=self.inventory,
                                     variable_manager=self.variable_manager,
                                     loader=self.loader, passwords=self.passwords)
-        result = playbook.run()
-        return result
+        playbook._tqm._stdout_callback = self.results_callback
+        playbook.run()
+
+        rest = self._callback()
+        print(rest)
+
+        return
+
+    def _callback(self):
+        results_raw = {}
+        results_raw['success'] = {}
+        results_raw['failed'] = {}
+        results_raw['unreachable'] = {}
+        for host, result in self.results_callback.host_ok.items():
+            results_raw['success'][host] = json.dumps(result._result)
+
+        for host, result in self.results_callback.host_failed.items():
+            results_raw['failed'][host] = result._result
+
+        for host, result in self.results_callback.host_unreachable.items():
+            results_raw['unreachable'][host] = result._result
+
+        return results_raw
 
 
 if __name__ == "__main__":
     a = AnsibleApi()
     host_list = ['106.13.54.147']
     tasks_list = [
-        dict(action=dict(module='command', args='touch xxxx')),
+        dict(action=dict(module='command', args='touch xxxx1')),
         # dict(action=dict(module='shell', args='python sleep.py')),
         # dict(action=dict(module='synchronize', args='src=/home/op/test dest=/home/op/ delete=yes')),
     ]
@@ -122,4 +126,3 @@ if __name__ == "__main__":
     # inventory = InventoryManager(loader,['./test_hosts'])
     # variable_manager = VariableManager(loader,inventory)
     # print(variable_manager.get_vars())
-

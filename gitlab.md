@@ -31,7 +31,7 @@
 #### 1.关闭firewalld防火墙
 ```shell script
 systemctl stop firewalld
-ystemctl disable firewalld
+systemctl disable firewalld
 ```
 #### 2.关闭SELINUX并重启系统
 ```shell script
@@ -40,6 +40,65 @@ vi /etc/sysconfig/selinux
 SELINUX=disabled
 
 reboot
+```
+#### 3.安装Omnibus Gitlab-ce package
+```shell script
+1.安装Gitlab组件
+yum -y install curl policycoreutils openssh-server openssh-clients postfix
+2.配置yum仓库
+curl -sS https://packages.gitlab.com/install/repositories/gitlab/gitlab-ce/script.rpm.sh | sudo bash 
+
+3.启动postfix邮件服务
+systemctl start postfix  && systemctl enable postfix
+4.安装gitlab-ce社区版
+yum install -y gitlab-ce
+```
+#### 4.安装配置管理
+```shell script
+1.证书创建与配置加载
+mkdir -p /etc/gitlab/ssl
+openssl genrsa -out "/etc/gitlab/ssl/gitlab.example.com.key" 2048
+openssl req -new -key "/etc/gitlab/ssl/gitlab.example.com.key" -out "/etc/gitlab/ssl/gitlab.example.com.csr"
+  cn
+  bj
+  bj
+  回车
+  回车
+  gitlab.example.com
+  admin@example.com
+  123456
+  回车
+openssl x509 -req -days 365 -in "/etc/gitlab/ssl/gitlab.example.com.csr" -signkey  "/etc/gitlab/ssl/gitlab.example.com.key" -out "/etc/gitlab/ssl/gitlab.example.com.crt" 
+openssl dhparam -out /etc/gitlab/ssl/dhparams.pem  2048
+chmod 600 *
+
+2.Nginx SSL代理服务配置
+vi /etc/gitlab/gitlab.rb
+
+external_url 'https://gitlab.example.com'
+nginx['redirect_http_to_https'] = true
+nginx['ssl_certificate'] = "/etc/gitlab/ssl/gitlab.example.com.crt"
+nginx['ssl_certificate_key'] = "/etc/gitlab/ssl/gitlab.example.com.key"
+nginx['ssl_dhparam'] = /etc/gitlab/ssl/dhparams.pem
+
+
+
+
+3.初始化Gitlab相关服务并完成安装
+gitlab-ctl reconfigure
+
+vi /var/opt/gitlab/nginx/conf/gitlab-http.conf
+
+server_name ......
+rewrite ^(.*)$ https://$host$1 permanent;
+
+gitlab-ctl restart
+
+
+亲测无用(还不如docker搭建的方便和快呢)
+
+
+
 ```
 
 
